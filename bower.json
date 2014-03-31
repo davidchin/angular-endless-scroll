@@ -1,22 +1,28 @@
 {
   "name": "angular-endless-scroll",
   "version": "0.0.0",
-  "main": "./dist/angular-endless-scroll",
+  "main": "./build/angular-endless-scroll.js",
   "description": "Endless scrolling for AngularJS",
   "authors": [
     "davidchin <davidchin.yf@gmail.com>"
   ],
   "license": "MIT",
   "ignore": [
-    "**/.*",
     "node_modules",
-    "bower_components",
+    "lib",
+    "src",
     "test",
-    "tests"
+    ".bowerrc",
+    ".gitignore",
+    ".jshintrc",
+    "bower.json",
+    "Gruntfile.js",
+    "karma.conf.js",
+    "package.json"
   ],
   "dependencies": {
-    "angular": "~1.2.13",
-    "jquery": "~2.1.0"
+    "angular": ">=1.2.6",
+    "jquery": ">=1.9.0"
   },
   "devDependencies": {
     "angular-mocks": "~1.2.13"

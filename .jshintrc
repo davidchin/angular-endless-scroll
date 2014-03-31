@@ -24,8 +24,18 @@
   "browser": true,
   "jquery": true,
   "predef": [
-    "module",
     "angular",
-    "console"
+    "console",
+
+    "module",
+    "inject",
+
+    "jasmine",
+    "describe",
+    "it",
+    "beforeEach",
+    "afterEach",
+    "expect",
+    "spyOn"
   ]
 }

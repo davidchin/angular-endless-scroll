@@ -1,5 +1,5 @@
 (function() {
   'use strict';
 
-  angular.module('davidchin.endlessScroll', []);
+  angular.module('dc.endlessScroll', []);
 })();

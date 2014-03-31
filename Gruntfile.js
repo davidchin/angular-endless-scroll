@@ -51,6 +51,14 @@ module.exports = function(grunt) {
         files: ['src/**/*.js'],
         tasks: ['build']
       }
+    },
+
+    bump: {
+      options: {
+        files: ['package.json', 'bower.json'],
+        commitFiles: ['package.json', 'bower.json'],
+        pushTo: 'origin'
+      }
     }
   });
 
@@ -62,6 +70,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-ngmin');
   grunt.loadNpmTasks('grunt-karma');
+  grunt.loadNpmTasks('grunt-bump');
 
   // Combined tasks
   grunt.registerTask('test', ['karma']);
