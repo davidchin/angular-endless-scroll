@@ -10,27 +10,27 @@
       // Convenient Methods
       // ------------------------------------
       function throttle(fn, delay) {
-        var previous = 0,
-            timeout;
+        var timeout,
+            previous = 0;
 
         return function() {
-          var current   = new Date().getTime(),
+          var current = new Date().getTime(),
               remaining = delay - (current - previous),
-              args      = arguments;
+              args = arguments;
 
           if (remaining <= 0) {
             if (timeout) {
               $timeout.cancel(timeout);
             }
 
-            timeout   = undefined;
-            previous  = current;
+            timeout = undefined;
+            previous = current;
 
             fn.apply(this, args);
           } else if (!timeout) {
             timeout = $timeout(function() {
-              timeout   = undefined;
-              previous  = new Date().getTime();
+              timeout = undefined;
+              previous = new Date().getTime();
 
               fn.apply(this, args);
             }, remaining);
@@ -42,9 +42,9 @@
         var matches = expression.match(NG_REPEAT_REGEXP);
 
         return {
-          item:       matches[1],
+          item: matches[1],
           collection: matches[2],
-          trackBy:    matches[3]
+          trackBy: matches[3]
         };
       }
 
@@ -57,19 +57,19 @@
         }
 
         var defaultOptions = {
-          scrollOffset:   -100,
+          scrollOffset: -100,
           scrollThrottle: 300
         };
 
         // Priviledged properties
-        this.scope       = scope;
-        this.window      = $($window);
-        this.element     = $(element);
-        this.attrs       = attrs;
-        this.options     = angular.extend({}, defaultOptions, this.scope.$eval(this.attrs.endlessScrollOptions));
-        this.dimension   = { window: {}, parent: {}, items: [] };
-        this.status      = {};
-        this.expression  = parseNgRepeatExp(this.attrs.endlessScroll);
+        this.scope = scope;
+        this.window = $($window);
+        this.element = $(element);
+        this.attrs = attrs;
+        this.options = angular.extend({}, defaultOptions, this.scope.$eval(this.attrs.endlessScrollOptions));
+        this.dimension = { window: {}, parent: {}, items: [] };
+        this.status = {};
+        this.expression = parseNgRepeatExp(this.attrs.endlessScroll);
 
         // Watch for events and scope changes
         this._watch();
@@ -104,7 +104,7 @@
 
       EndlessScroll.prototype.next = function() {
         if (!this.status.isPendingNext) {
-          this.status.isPendingNext = true;
+          this._setPending('next', true);
 
           // Notify parent scope
           this.scope.$emit('endlessScroll:next', this);
@@ -113,7 +113,7 @@
 
       EndlessScroll.prototype.previous = function() {
         if (!this.status.isPendingPrevious) {
-          this.status.isPendingPrevious = true;
+          this._setPending('previous', true);
 
           // Notify parent scope
           this.scope.$emit('endlessScroll:previous', this);
@@ -184,8 +184,8 @@
 
         // Flag status
         $timeout(angular.bind(this, function() {
-          this.status.isPendingNext     = false;
-          this.status.isPendingPrevious = false;
+          this._setPending('next', false);
+          this._setPending('previous', false);
 
           // Perform check
           if (angular.isArray(collection) && angular.isArray(oldCollection)) {
@@ -195,72 +195,81 @@
       };
 
       EndlessScroll.prototype.clean = function() {
-        var parent = this._getParent(),
-            firstVisibleItemIndex,
+        var firstVisibleItemIndex,
             lastVisibleItemIndex,
             defaultPlaceholderAttrs,
             placeholderHeight,
             itemTagName,
             newItems,
-            children;
+            children,
+            parent = this._getParent();
 
         // Set default placeholder attrs
         defaultPlaceholderAttrs = {
           visibility: 'hidden',
-          padding:    0,
-          border:     0
+          padding: 0,
+          border: 0
         };
 
         // Determine dimension of each repeated element
         this.dimension.items = this._getDimension('items');
 
-        // Determine tag name
-        children    = this._getChildren();
-        itemTagName = children.get(0) && children.prop('tagName').toLowerCase();
+        if (this.dimension.items && this.originalItems &&
+            this.dimension.items.length === this.originalItems.length) {
+          // Determine tag name
+          children = this._getChildren();
+          itemTagName = children.get(0) && children.prop('tagName').toLowerCase();
 
-        // Determine first and last visible item
-        angular.forEach(this.dimension.items, function(dimension, itemIndex) {
-          var isVisible = dimension.bottom >= this.dimension.window.top - this.dimension.window.height &&
-                          dimension.top <= this.dimension.window.bottom + this.dimension.window.height;
+          // Determine first and last visible item
+          angular.forEach(this.dimension.items, function(dimension, itemIndex) {
+            var isVisible = dimension.bottom >= this.dimension.window.top - this.dimension.window.height &&
+                            dimension.top <= this.dimension.window.bottom + this.dimension.window.height;
 
-          // Set reference to item index
-          if (isVisible) {
-            if (firstVisibleItemIndex === undefined) {
-              firstVisibleItemIndex = itemIndex;
+            // Set reference to item index
+            if (isVisible) {
+              if (firstVisibleItemIndex === undefined) {
+                firstVisibleItemIndex = itemIndex;
+              }
+
+              lastVisibleItemIndex = itemIndex;
+            }
+          }, this);
+
+          // Create placeholder
+          if (!this.placeholder && itemTagName) {
+            this.placeholder = $('<' + itemTagName + '>');
+
+            // Insert placeholder before all items
+            this.placeholder
+              .css(defaultPlaceholderAttrs)
+              .prependTo(parent);
+          }
+
+          // Calculate total space occupied by items before the first visible item
+          if (this.placeholder) {
+            if (angular.isDefined(firstVisibleItemIndex)) {
+              placeholderHeight = this.dimension.items[firstVisibleItemIndex].top - this.dimension.parent.top;
+            } else {
+              placeholderHeight = 0;
             }
 
-            lastVisibleItemIndex  = itemIndex;
+            this.placeholder.height(placeholderHeight);
           }
-        }, this);
 
-        // Create placeholder - inserted before all items
-        if (!this.placeholder && itemTagName) {
-          this.placeholder  = $('<' + itemTagName + '>')
-                                .css(defaultPlaceholderAttrs)
-                                .prependTo(parent);
-        }
-
-        // Calculate total space occupied by items before the first visible item
-        if (this.placeholder) {
-          placeholderHeight = angular.isDefined(firstVisibleItemIndex) ?
-                              this.dimension.items[firstVisibleItemIndex].top - this.dimension.parent.top :
-                              0;
-          this.placeholder.height(placeholderHeight);
-        }
-
-        // Add to items
-        if (angular.isDefined(firstVisibleItemIndex) &&
-            angular.isDefined(lastVisibleItemIndex) &&
-            angular.isArray(this.items)) {
-          newItems = this.originalItems.slice(firstVisibleItemIndex, lastVisibleItemIndex + 1);
-          this.items.splice.apply(this.items, [0, this.items.length].concat(newItems));
+          // Add to items
+          if (angular.isDefined(firstVisibleItemIndex) &&
+              angular.isDefined(lastVisibleItemIndex) &&
+              angular.isArray(this.items) &&
+              angular.isArray(this.originalItems)) {
+            newItems = this.originalItems.slice(firstVisibleItemIndex, lastVisibleItemIndex + 1);
+            this.items.splice.apply(this.items, [0, this.items.length].concat(newItems));
+          }
         }
       };
 
       // Priviledged methods
       EndlessScroll.prototype._watch = function() {
-        var collectionExp = this.expression.collection,
-            onScroll;
+        var collectionExp = this.expression.collection;
 
         if (collectionExp) {
           // Watch for data changes
@@ -282,9 +291,28 @@
         }
       };
 
+      EndlessScroll.prototype._setPending = function(type, bool) {
+        var attr = 'isPending' + type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+
+        this.status[attr] = angular.isUndefined(bool) ? true : !!bool;
+        this.timeouts = this.timeouts || {};
+
+        if (this.status[attr]) {
+          if (this.timeouts[attr]) {
+            $timeout.cancel(this.timeouts[attr]);
+            delete this.timeouts[attr];
+          }
+
+          // Automatically set the wait status to false after a time period
+          this.timeouts[attr] = $timeout(angular.bind(this, function() {
+            this.status[attr] = false;
+          }), 5000);
+        }
+      };
+
       EndlessScroll.prototype._onScroll = function() {
         this.scope.$apply(angular.bind(this, function() {
-          // Define throttled check method, if not already defined
+          // Define a throttled check method, if it's not already defined
           if (!this._throttledCheck) {
             this._throttledCheck = throttle(angular.bind(this, this.check), this.options.scrollThrottle);
           }
@@ -303,10 +331,10 @@
       };
 
       EndlessScroll.prototype._getDimension = function(type) {
-        var parent = this._getParent(),
-            height,
+        var height,
             top,
-            bottom;
+            bottom,
+            parent = this._getParent();
 
         switch(type) {
           case 'window':
@@ -332,22 +360,22 @@
             };
 
           case 'items':
-            var items = this.dimension.items.slice(),
-                itemIndex;
+            var itemIndex,
+                items = this.dimension.items.slice();
 
             this._getChildren()
               .each(angular.bind(this, function(i, child) {
-                child     = $(child);
-                height    = child.outerHeight();
-                top       = child.get(0) && child.offset().top;
-                bottom    = top + height;
+                child = $(child);
+                height = child.outerHeight();
+                top = child.get(0) && child.offset().top;
+                bottom = top + height;
                 itemIndex = $.inArray(child.scope()[this.expression.item], this.originalItems);
 
                 // Set reference to the dimension of each visible element
                 if (itemIndex > -1) {
                   items[itemIndex] = {
                     height: height,
-                    top:    top,
+                    top: top,
                     bottom: bottom
                   };
                 }
@@ -359,21 +387,21 @@
 
       EndlessScroll.prototype._getScrollStatus = function() {
         var windowTop = this.window.scrollTop(),
-            status    = {};
+            status = {};
 
         if (this.dimension.window.top > 0) {
-          status.isScrollingUp   = windowTop - this.dimension.window.top < 0;
+          status.isScrollingUp = windowTop - this.dimension.window.top < 0;
           status.isScrollingDown = windowTop - this.dimension.window.top > 0;
         } else {
-          status.isScrollingUp   = false;
+          status.isScrollingUp = false;
           status.isScrollingDown = true;
         }
 
         if (angular.isArray(this.items) && angular.isArray(this.originalItems)) {
-          status.isEndReached   = this.items[this.items.length - 1] === this.originalItems[this.originalItems.length - 1];
+          status.isEndReached = this.items[this.items.length - 1] === this.originalItems[this.originalItems.length - 1];
           status.isStartReached = this.items[0] === this.originalItems[0];
         } else {
-          status.isEndReached   = true;
+          status.isEndReached = true;
           status.isStartReached = false;
         }
 
@@ -398,9 +426,9 @@
       };
 
       EndlessScrollTemplate.prototype._create = function(element, attrs) {
-        var elementAttrs  = Array.prototype.slice.call(element.prop('attributes'), 0),
-            parsedExp     = parseNgRepeatExp(attrs.endlessScroll),
-            ngRepeatExp   = parsedExp.item + ' in _endlessScroll.items' + (parsedExp.trackBy ? ' ' + parsedExp.trackBy : '');
+        var elementAttrs = Array.prototype.slice.call(element.prop('attributes'), 0),
+            parsedExp = parseNgRepeatExp(attrs.endlessScroll),
+            ngRepeatExp = parsedExp.item + ' in _endlessScroll.items' + (parsedExp.trackBy ? ' ' + parsedExp.trackBy : '');
 
         // Remove all element attributes as 'replace' already copies over these attributes
         angular.forEach(elementAttrs, function(attr) {

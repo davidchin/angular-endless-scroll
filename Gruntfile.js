@@ -1,53 +1,59 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
   'use strict';
 
-  // Config
   grunt.initConfig({
+    // Configure tasks
+    pkg: grunt.file.readJSON('bower.json'),
+
+    banner: '/*!\n' +
+            ' * <%= pkg.name %>.js v<%= pkg.version %>\n' +
+            ' * <%= pkg.homepage %>\n' +
+            ' * Copyright <%= grunt.template.today("yyyy") %> <%= pkg.author.name %>\n' +
+            ' * <%= pkg.license %> License\n' +
+            ' */\n',
+
     jshint: {
-      options: {
-        jshintrc: '.jshintrc'
-      },
       all: ['Gruntfile.js', 'src/**/*.js', 'test/**/*.js']
     },
 
     concat: {
       options: {
-        separator: ';'
+        banner: '<%= banner %>',
+        stripBanners: true
       },
 
-      build: {
+      dist: {
         src: ['src/module.js', 'src/**/*.js'],
-        dest: 'build/angular-endless-scroll.js'
+        dest: 'build/<%= pkg.name %>.js'
       }
     },
 
     ngmin: {
-      build: {
-        src: ['build/angular-endless-scroll.js'],
-        dest: 'build/angular-endless-scroll.min.js'
+      dist: {
+        src: 'build/<%= pkg.name %>.js',
+        dest: 'build/<%= pkg.name %>.min.js'
       }
     },
 
     uglify: {
-      build: {
-        files: {
-          'build/angular-endless-scroll.min.js': ['build/angular-endless-scroll.min.js']
-        }
+      options: {
+        banner: '<%= banner %>'
+      },
+
+      dist: {
+        src: 'build/<%= pkg.name %>.min.js',
+        dest: 'build/<%= pkg.name %>.min.js'
       }
     },
 
     clean: {
-      build: ['build/**/*.js']
-    },
-
-    karma: {
-      unit: {
-        configFile: 'karma.conf.js'
-      }
+      dist: [
+        'build/**/*.js'
+      ]
     },
 
     watch: {
-      scripts: {
+      dist: {
         files: ['src/**/*.js'],
         tasks: ['build']
       }
@@ -56,23 +62,29 @@ module.exports = function(grunt) {
     bump: {
       options: {
         files: ['package.json', 'bower.json'],
-        commitFiles: ['package.json', 'bower.json'],
-        pushTo: 'origin'
+        commitFiles: ['-a'],
+        push: false
+      }
+    },
+
+    karma: {
+      unit: {
+        configFile: 'karma.conf.js'
       }
     }
   });
 
   // Load tasks
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-bump');
   grunt.loadNpmTasks('grunt-ngmin');
   grunt.loadNpmTasks('grunt-karma');
-  grunt.loadNpmTasks('grunt-bump');
 
-  // Combined tasks
+  // Register custom tasks
   grunt.registerTask('test', ['karma']);
   grunt.registerTask('build', ['jshint', 'clean', 'concat', 'ngmin', 'uglify']);
 };

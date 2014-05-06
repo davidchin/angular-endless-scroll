@@ -3,21 +3,21 @@
   "version": "0.0.1",
   "main": "./build/angular-endless-scroll.js",
   "description": "Endless scrolling for AngularJS",
-  "authors": [
-    "davidchin <davidchin.yf@gmail.com>"
-  ],
+  "author": {
+    "name": "David Chin",
+    "email": "davidchin.yf@gmail.com"
+  },
+  "homepage": "http://davidchin.me",
   "license": "MIT",
   "ignore": [
+    "**/.*",
     "node_modules",
-    "lib",
+    "bower_components",
     "src",
     "test",
-    ".bowerrc",
-    ".gitignore",
-    ".jshintrc",
-    "bower.json",
     "Gruntfile.js",
     "karma.conf.js",
+    "bower.json",
     "package.json"
   ],
   "dependencies": {

@@ -3,6 +3,10 @@ angular-endless-scroll.js
 
 EndlessScroll an AngularJS directive that can help you implement an infinite scrolling UI. As your user scrolls a page, the directive determines if there is a need to fetch more data. If so, it emits an event to the controller of the page requesting for more data, which you can listen for. Your event listener can then make an API request for the next page of data, which get populated by the directive once they are ready. To improve performance and avoid the page getting overloaded with DOM elements, the directive only renders items that are currently (and would-be) visible in the viewport.
 
+## Demo
+
+You can have a look at the [demo here](http://davidchin.me/demos/angular/endless-scroll).
+
 ## Getting Started
 
 You can get EndlessScroll via GitHub or via Bower `bower install angular-endless-scroll`
@@ -17,7 +21,7 @@ This module requires the following libraries: `angular >=1.2.6` and `jquery >=1.
 
 Also, include `'dc.endlessScroll'` as part of your application module. For example: `angular.module('App', ['dc.endlessScroll'])`
 
-## Examples
+## Example
 
 Below is a simple example of how to use EndlessScroll directive in your project. You need to specify `endless-scroll` as an attribute to the element you want to repeat. Please note that the example uses some Bootstrap classes for the purpose of a demonstration - they are not required.
 
