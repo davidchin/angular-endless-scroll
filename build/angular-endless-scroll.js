@@ -1,5 +1,5 @@
 /*!
- * angular-endless-scroll.js v0.0.2
+ * angular-endless-scroll.js v0.0.3
  * http://davidchin.me
  * Copyright 2014 David Chin
  * MIT License
@@ -26,7 +26,7 @@
   angular.module('dc.endlessScroll')
 
     /**
-     * @object dc.endlessScroll.endlessScroll
+     * @member dc.endlessScroll.endlessScroll
      *
      * @description
      * A directive for implementing an endless scrolling list.
@@ -36,7 +36,7 @@
 
       /**
        * @function throttle
-       * @inner
+       * @private
        * @param {Function} fn
        * @param {number} delay
        * @returns {Function}
@@ -75,7 +75,7 @@
 
       /**
        * @function parseNgRepeatExp
-       * @inner
+       * @private
        * @param {string} expression
        * @returns {Object}
        *
