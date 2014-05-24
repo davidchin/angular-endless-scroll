@@ -26,6 +26,7 @@
   "predef": [
     "angular",
     "console",
+    "require",
 
     "module",
     "inject",

@@ -49,6 +49,10 @@ module.exports = function (grunt) {
     clean: {
       dist: [
         'build/**/*.js'
+      ],
+
+      docs: [
+        'docs'
       ]
     },
 
@@ -56,6 +60,11 @@ module.exports = function (grunt) {
       dist: {
         files: ['src/**/*.js'],
         tasks: ['build']
+      },
+
+      docs: {
+        files: ['src/**/*.js'],
+        tasks: ['docs']
       }
     },
 
@@ -63,13 +72,33 @@ module.exports = function (grunt) {
       options: {
         files: ['package.json', 'bower.json'],
         commitFiles: ['-a'],
-        push: false
+        push: false,
+        createTag: false
       }
     },
 
     karma: {
       unit: {
         configFile: 'karma.conf.js'
+      }
+    },
+
+    jsdoc: {
+      dist: {
+        src: ['src/**/*.js'],
+        options: {
+          destination: 'docs',
+          private: false
+        }
+      }
+    },
+
+    connect: {
+      server: {
+        options: {
+          port: 9001,
+          hostname: '0.0.0.0'
+        }
       }
     }
   });
@@ -80,11 +109,14 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-bump');
   grunt.loadNpmTasks('grunt-ngmin');
   grunt.loadNpmTasks('grunt-karma');
+  grunt.loadNpmTasks('grunt-jsdoc');
 
   // Register custom tasks
   grunt.registerTask('test', ['karma']);
-  grunt.registerTask('build', ['jshint', 'clean', 'concat', 'ngmin', 'uglify']);
+  grunt.registerTask('build', ['jshint', 'clean:dist', 'concat', 'ngmin', 'uglify']);
+  grunt.registerTask('docs', ['clean:docs', 'jsdoc']);
 };

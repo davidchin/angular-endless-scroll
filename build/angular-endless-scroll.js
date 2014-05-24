@@ -1,5 +1,5 @@
 /*!
- * angular-endless-scroll.js v0.0.1
+ * angular-endless-scroll.js v0.0.2
  * http://davidchin.me
  * Copyright 2014 David Chin
  * MIT License
@@ -7,6 +7,16 @@
 (function() {
   'use strict';
 
+  /**
+   * @namespace dc
+   */
+
+  /**
+   * @module dc.endlessScroll
+   *
+   * @description
+   * A module for implementing an endless/infinite scroll user interface.
+   */
   angular.module('dc.endlessScroll', []);
 })();
 
@@ -15,12 +25,25 @@
 
   angular.module('dc.endlessScroll')
 
+    /**
+     * @object dc.endlessScroll.endlessScroll
+     *
+     * @description
+     * A directive for implementing an endless scrolling list.
+     */
     .directive('endlessScroll', function($window, $timeout) {
       var NG_REPEAT_REGEXP = /^\s*(.+)\s+in\s+([\r\n\s\S]*?)\s*(\s+track\s+by\s+(.+)\s*)?$/;
 
-      // ------------------------------------
-      // Convenient Methods
-      // ------------------------------------
+      /**
+       * @function throttle
+       * @inner
+       * @param {Function} fn
+       * @param {number} delay
+       * @returns {Function}
+       *
+       * @description
+       * Return a function that only gets executed once within a given time period.
+       */
       function throttle(fn, delay) {
         var timeout,
             previous = 0;
@@ -50,6 +73,16 @@
         };
       }
 
+      /**
+       * @function parseNgRepeatExp
+       * @inner
+       * @param {string} expression
+       * @returns {Object}
+       *
+       * @description
+       * Parse ngRepeat expression and
+       * return the name of the loop variable, the collection and tracking expression
+       */
       function parseNgRepeatExp(expression) {
         var matches = expression.match(NG_REPEAT_REGEXP);
 
@@ -60,12 +93,19 @@
         };
       }
 
-      // ------------------------------------
-      // EndlessScroll
-      // ------------------------------------
-      function EndlessScroll(scope, element, attrs) {
-        if (!(this instanceof EndlessScroll) ) {
-          return new EndlessScroll(scope, element, attrs);
+      /**
+       * @constructor dc.endlessScroll.EndlessScroller
+       * @param {Object} scope The scope of the directive.
+       * @param {Object} element The element of the directive.
+       * @param {Object} attrs The attributes of the directive.
+       *
+       * @description
+       * The controller of endlessScroll directive.
+       * Each directive creates an instance of EndlessScroller.
+       */
+      function EndlessScroller(scope, element, attrs) {
+        if (!(this instanceof EndlessScroller) ) {
+          return new EndlessScroller(scope, element, attrs);
         }
 
         var defaultOptions = {
@@ -87,8 +127,14 @@
         this._watch();
       }
 
-      // Public methods
-      EndlessScroll.prototype.check = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#check
+       *
+       * @description
+       * Check to see if more items need to be fetched
+       * by checking if the user has scrolled to the bottom or top.
+       */
+      EndlessScroller.prototype.check = function() {
         // Determine if scrolling up or down and if we reach the end of list or not
         angular.extend(this.status, this._getScrollStatus());
 
@@ -114,7 +160,13 @@
         }
       };
 
-      EndlessScroll.prototype.next = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#next
+       *
+       * @description
+       * Request the next page of items by notifying its parent controller.
+       */
+      EndlessScroller.prototype.next = function() {
         if (!this.status.isPendingNext) {
           this._setPending('next', true);
 
@@ -123,7 +175,13 @@
         }
       };
 
-      EndlessScroll.prototype.previous = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#previous
+       *
+       * @description
+       * Request the previous page of items by notifying its parent controller.
+       */
+      EndlessScroller.prototype.previous = function() {
         if (!this.status.isPendingPrevious) {
           this._setPending('previous', true);
 
@@ -132,7 +190,14 @@
         }
       };
 
-      EndlessScroll.prototype.update = function(collection) {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#update
+       * @param {Array} collection A list of items bound to the directive.
+       *
+       * @description
+       * Insert new items before or after a list of existing items and render them.
+       */
+      EndlessScroller.prototype.update = function(collection) {
         var beforeItems,
             afterItems,
             firstCommonItemIndex,
@@ -206,7 +271,14 @@
         }));
       };
 
-      EndlessScroll.prototype.clean = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#clean
+       *
+       * @description
+       * Remove items which are not visible in the viewport from DOM
+       * and re-insert them when they become visible again.
+       */
+      EndlessScroller.prototype.clean = function() {
         var firstVisibleItemIndex,
             lastVisibleItemIndex,
             defaultPlaceholderAttrs,
@@ -279,8 +351,14 @@
         }
       };
 
-      // Priviledged methods
-      EndlessScroll.prototype._watch = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#_watch
+       * @protected
+       *
+       * @description
+       * Watch for changes to scope properties and events fired by the scope and DOM
+       */
+      EndlessScroller.prototype._watch = function() {
         var collectionExp = this.expression.collection;
 
         if (collectionExp) {
@@ -297,13 +375,29 @@
         }
       };
 
-      EndlessScroll.prototype._unwatch = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#_unwatch
+       * @protected
+       *
+       * @description
+       * Watch for changes to scope properties and events fired by the scope and DOM
+       */
+      EndlessScroller.prototype._unwatch = function() {
         if (this._boundOnScroll) {
           this.window.off('scroll', this._boundOnScroll);
         }
       };
 
-      EndlessScroll.prototype._setPending = function(type, bool) {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#_setPending
+       * @protected
+       * @param {string} type
+       * @param {boolean} [bool=true]
+       *
+       * @description
+       * Set a flag to indicate if the directive is pending for more items.
+       */
+      EndlessScroller.prototype._setPending = function(type, bool) {
         var attr = 'isPending' + type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
         this.status[attr] = angular.isUndefined(bool) ? true : !!bool;
@@ -322,7 +416,14 @@
         }
       };
 
-      EndlessScroll.prototype._onScroll = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#_onScroll
+       * @protected
+       *
+       * @description
+       * An event handler for scrolling.
+       */
+      EndlessScroller.prototype._onScroll = function() {
         this.scope.$apply(angular.bind(this, function() {
           // Define a throttled check method, if it's not already defined
           if (!this._throttledCheck) {
@@ -334,7 +435,15 @@
         }));
       };
 
-      EndlessScroll.prototype._getParent = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#_getParent
+       * @protected
+       * @returns {Object} The parent element of the directive element.
+       *
+       * @description
+       * Find the parent element of the directive and return it.
+       */
+      EndlessScroller.prototype._getParent = function() {
         if (!this._parent || !this._parent.get(0)) {
           this._parent = this.element.parent();
         }
@@ -342,7 +451,12 @@
         return this._parent;
       };
 
-      EndlessScroll.prototype._getDimension = function(type) {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#_getDimension
+       * @protected
+       * @param {string} type
+       */
+      EndlessScroller.prototype._getDimension = function(type) {
         var height,
             top,
             bottom,
@@ -397,7 +511,12 @@
         }
       };
 
-      EndlessScroll.prototype._getScrollStatus = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#_getScrollStatus
+       * @protected
+       * @returns {Object} An object containing information about the scroll status of the directive element.
+       */
+      EndlessScroller.prototype._getScrollStatus = function() {
         var windowTop = this.window.scrollTop(),
             status = {};
 
@@ -420,24 +539,47 @@
         return status;
       };
 
-      EndlessScroll.prototype._getChildren = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScroller#_getChildren
+       * @protected
+       * @returns The child elements of the directive element. It is the list of items which are currently rendered in DOM.
+       */
+      EndlessScroller.prototype._getChildren = function() {
         var selector = '[ng-repeat]';
 
         return this._getParent().children(selector);
       };
 
-      // ------------------------------------
-      // EndlessScrollTemplate
-      // ------------------------------------
-      function EndlessScrollTemplate(element, attrs) {
+      /**
+       * @constructor dc.endlessScroll.EndlessScrollerTemplate
+       * @param {Object} element The directive element.
+       * @param {Object} attrs The directive attributes.
+       *
+       * @description
+       * The template of endlessScroll directive.
+       */
+      function EndlessScrollerTemplate(element, attrs) {
         this.html = this._create(element, attrs);
       }
 
-      EndlessScrollTemplate.prototype.toString = function() {
+      /**
+       * @function dc.endlessScroll.EndlessScrollerTemplate#toString
+       * @returns {String} The template element as HTML string
+       */
+      EndlessScrollerTemplate.prototype.toString = function() {
         return this.html;
       };
 
-      EndlessScrollTemplate.prototype._create = function(element, attrs) {
+      /**
+       * @function dc.endlessScroll.EndlessScrollerTemplate#_create
+       * @param element {Object}
+       * @param attrs {Object}
+       * @returns {String} The template element as HTML string
+       *
+       * @description
+       * Create a template element for the directive.
+       */
+      EndlessScrollerTemplate.prototype._create = function(element, attrs) {
         var elementAttrs = Array.prototype.slice.call(element.prop('attributes'), 0),
             parsedExp = parseNgRepeatExp(attrs.endlessScroll),
             ngRepeatExp = parsedExp.item + ' in _endlessScroll.items' + (parsedExp.trackBy ? ' ' + parsedExp.trackBy : '');
@@ -459,11 +601,11 @@
         replace: true,
 
         template: function(element, attrs) {
-          return (new EndlessScrollTemplate(element, attrs)).toString();
+          return (new EndlessScrollerTemplate(element, attrs)).toString();
         },
 
         controller: function($scope, $element, $attrs) {
-          return new EndlessScroll($scope, $element, $attrs);
+          return new EndlessScroller($scope, $element, $attrs);
         },
 
         link: function(scope, element, attrs, controller) {
