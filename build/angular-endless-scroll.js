@@ -1,5 +1,5 @@
 /*!
- * angular-endless-scroll.js v0.0.3
+ * angular-endless-scroll.js v0.0.4
  * http://davidchin.me
  * Copyright 2014 David Chin
  * MIT License
