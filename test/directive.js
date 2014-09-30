@@ -84,6 +84,24 @@
 
         expect(directive.controller.update).toHaveBeenCalled();
       });
+
+      it('should be configurable using HTML attributes', function() {
+        expect(directive.controller.options.scrollOffset).toEqual(-100);
+
+        html = '<div endless-scroll="cat in cats" endless-scroll-options="{ scrollOffset: -200 }"></div>';
+        directive = compile(html);
+
+        expect(directive.controller.options.scrollOffset).toEqual(-200);
+      });
+
+      it('should assign the browser window as the default window object', inject(function($window) {
+        expect(directive.controller.window).toEqual($($window));
+
+        html = '<div endless-scroll="cat in cats" endless-scroll-options="{ window: \'#sidebar\' }"></div>';
+        directive = compile(html);
+
+        expect(directive.controller.window).toEqual($('#sidebar'));
+      }));
     });
 
     describe('when it checks if it is neccessary to fetch more data', function() {
@@ -335,6 +353,17 @@
           expect(dimension.top).toBeDefined();
           expect(dimension.bottom).toBeDefined();
         });
+      });
+
+      it('should normalise element\'s offset values if not using the document window as the reference point', function() {
+        directive.controller.window = jasmine.createSpyObj('window', ['get', 'scrollTop']);
+        directive.controller.docWindow = jasmine.createSpyObj('docWindow', ['get', 'scrollTop']);
+
+        directive.controller.window.scrollTop.andReturn(100);
+        directive.controller.docWindow.scrollTop.andReturn(20);
+        directive.controller.clean();
+
+        expect(directive.controller.dimension.items[0].top).toEqual(80);
       });
 
       it('should create a placeholder and insert it before all items if it does not exist', function() {

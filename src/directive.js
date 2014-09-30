@@ -82,10 +82,6 @@
        * Each directive creates an instance of EndlessScroller.
        */
       function EndlessScroller(scope, element, attrs) {
-        if (!(this instanceof EndlessScroller) ) {
-          return new EndlessScroller(scope, element, attrs);
-        }
-
         var defaultOptions = {
           scrollOffset: -100,
           scrollThrottle: 300
@@ -93,10 +89,11 @@
 
         // Priviledged properties
         this.scope = scope;
-        this.window = $($window);
-        this.element = $(element);
         this.attrs = attrs;
+        this.element = $(element);
         this.options = angular.extend({}, defaultOptions, this.scope.$eval(this.attrs.endlessScrollOptions));
+        this.docWindow = $($window);
+        this.window = this.options.window ? $(this.options.window) : this.docWindow;
         this.dimension = { window: {}, parent: {}, items: [] };
         this.status = {};
         this.expression = parseNgRepeatExp(this.attrs.endlessScroll);
@@ -430,6 +427,24 @@
       };
 
       /**
+       * @function dc.endlessScroll.EndlessScroller#_getOffsetTop
+       * @protected
+       * @returns {Number} The offset top of an element relative to the document
+       *
+       * @description
+       * Get the offset top of an element
+       */
+      EndlessScroller.prototype._getOffsetTop = function(element) {
+        var offset = element.offset();
+
+        if (this.window.get(0) === $window) {
+          return offset.top;
+        } else {
+          return offset.top + this.window.scrollTop() - this.docWindow.scrollTop();
+        }
+      };
+
+      /**
        * @function dc.endlessScroll.EndlessScroller#_getDimension
        * @protected
        * @param {string} type
@@ -442,7 +457,7 @@
 
         switch(type) {
           case 'window':
-            height = this.window.height();
+            height = this.window.outerHeight();
             top    = this.window.scrollTop();
             bottom = top + height;
 
@@ -453,8 +468,8 @@
             };
 
           case 'parent':
-            height = parent.height();
-            top    = parent.get(0) && parent.offset().top;
+            height = parent.outerHeight();
+            top    = parent.get(0) && this._getOffsetTop(parent);
             bottom = top + height;
 
             return {
@@ -471,7 +486,7 @@
               .each(angular.bind(this, function(i, child) {
                 child = $(child);
                 height = child.outerHeight();
-                top = child.get(0) && child.offset().top;
+                top = child.get(0) && this._getOffsetTop(child);
                 bottom = top + height;
                 itemIndex = $.inArray(child.scope()[this.expression.item], this.originalItems);
 
