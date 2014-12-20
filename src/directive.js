@@ -598,11 +598,11 @@
         },
 
         controller: function($scope, $element, $attrs) {
-          return new EndlessScroller($scope, $element, $attrs);
-        },
+          var endlessScroll = new EndlessScroller($scope, $element, $attrs);
 
-        link: function(scope, element, attrs, controller) {
-          scope._endlessScroll = controller;
+          $scope._endlessScroll = endlessScroll;
+
+          return endlessScroll;
         }
       };
     });
