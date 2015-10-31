@@ -1,7 +1,7 @@
 {
   "name": "angular-endless-scroll",
-  "version": "0.0.5",
-  "main": "./build/angular-endless-scroll.js",
+  "version": "0.1.0",
+  "main": "./dist/angular-endless-scroll.js",
   "description": "Endless scrolling for AngularJS",
   "author": {
     "name": "David Chin",

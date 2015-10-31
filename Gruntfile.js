@@ -24,14 +24,14 @@ module.exports = function (grunt) {
 
       dist: {
         src: ['src/module.js', 'src/**/*.js'],
-        dest: 'build/<%= pkg.name %>.js'
+        dest: 'dist/<%= pkg.name %>.js'
       }
     },
 
     ngmin: {
       dist: {
-        src: 'build/<%= pkg.name %>.js',
-        dest: 'build/<%= pkg.name %>.min.js'
+        src: 'dist/<%= pkg.name %>.js',
+        dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
 
@@ -41,14 +41,14 @@ module.exports = function (grunt) {
       },
 
       dist: {
-        src: 'build/<%= pkg.name %>.min.js',
-        dest: 'build/<%= pkg.name %>.min.js'
+        src: 'dist/<%= pkg.name %>.min.js',
+        dest: 'dist/<%= pkg.name %>.min.js'
       }
     },
 
     clean: {
       dist: [
-        'build/**/*.js'
+        'dist/**/*.js'
       ],
 
       docs: [
@@ -73,7 +73,7 @@ module.exports = function (grunt) {
         files: ['package.json', 'bower.json'],
         commitFiles: ['-a'],
         push: false,
-        createTag: false
+        createTag: true
       }
     },
 
