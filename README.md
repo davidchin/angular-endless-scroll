@@ -11,7 +11,7 @@ You can have a look at the [demo here](http://davidchin.me/demos/angular/endless
 
 You can get EndlessScroll via GitHub or via Bower `bower install angular-endless-scroll`
 
-This module requires the following libraries: `angular >=1.2.6` and `jquery >=1.9.0`. Make sure you include the following script tags on your page (or in your packaged js file) in this order.
+This module requires the following libraries: `angular ^1.2.6` and `jquery ^1.9.0`. Make sure you include the following script tags on your page (or in your packaged js file) in this order.
 
 ```html
 <script type="text/javascript" src="/path/to/jquery.min.js"></script>
