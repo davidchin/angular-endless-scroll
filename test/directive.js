@@ -336,6 +336,14 @@
         $timeout.flush();
         expect(directive.controller.check).not.toHaveBeenCalled();
       }));
+
+      it('should reset displayed items if there is a new data source', function() {
+        directive.controller.items = items;
+        parentScope.cats = [];
+        parentScope.$apply();
+
+        expect(directive.controller.items).not.toEqual(items);
+      });
     });
 
     describe('when it tries to clean up unused items', function() {

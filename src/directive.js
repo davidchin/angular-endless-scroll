@@ -338,6 +338,12 @@
 
         if (collectionExp) {
           // Watch for data changes
+          this.scope.$watch(collectionExp, angular.bind(this, function watch(collection, oldCollection) {
+            if (collection && oldCollection && this.items) {
+              this.items = undefined;
+            }
+          }));
+
           this.scope.$watchCollection(collectionExp, angular.bind(this, function watchCollection() {
             this.update.apply(this, arguments);
           }));
